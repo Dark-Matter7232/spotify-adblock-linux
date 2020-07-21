@@ -3,8 +3,8 @@ Spotify adblocker for macos that works by wrapping `getaddrinfo` and *libcurl*'s
 
 ### Notes
 Based on [`abba23/spotify-adblock-linux`](https://github.com/abba23/spotify-adblock-linux.git),
-tweaked to inject on macos with `DYLD_INSERT_LIBRARIES`
-updated and maintained by me 
+tweaked to inject on macos with `DYLD_INSERT_LIBRARIES`,
+updated and maintained by me ,
 This program requires gcc and will not compile with clang or the default macos gcc.
 
 ## Usage
