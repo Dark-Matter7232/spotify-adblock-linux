@@ -1,51 +1,11 @@
-# spotify-adblock-linux
-Spotify adblocker for Linux that works by wrapping `getaddrinfo` and *libcurl*'s `curl_easy_setopt` and blocking all domains that aren't whitelisted, as well as blacklisted URLs.
+# spotify-adblock-macos
+Spotify adblocker for macos that works by wrapping `getaddrinfo` and *libcurl*'s `curl_easy_setopt` and blocking all domains that aren't whitelisted, as well as blacklisted URLs.
 
 ### Notes
-* This does not work with the snap Spotify package.
-
-## Building
-Prerequisites:
-* Make
-* gcc
-* libcurl headers (e.g. `libcurl4-gnutls-dev` on Debian/Ubuntu systems)
-
----
-
-    $ git clone https://github.com/abba23/spotify-adblock-linux.git
-    $ cd spotify-adblock-linux
-    $ make
-
-## Installing
-    $ sudo make install
+Based on [`abba23/spotify-adblock-linux`](https://github.com/abba23/spotify-adblock-linux.git),
+tweaked to inject on macos with `DYLD_INSERT_LIBRARIES`
+updated and maintained by me 
+This program requires gcc and will not compile with clang or the default macos gcc.
 
 ## Usage
-
-### Command-line
-    $ LD_PRELOAD=/usr/local/lib/spotify-adblock.so spotify
-
-### Desktop file
-You can also integrate it with your desktop environment by creating a `.desktop` file (e.g. `spotify-adblock.desktop`) in `~/.local/share/applications`. This lets you easily run it from an application launcher without opening a terminal.
-
-<details> 
-  <summary>Example</summary>
-  <p>
-
-```
-[Desktop Entry]
-Type=Application
-Name=Spotify (adblock)
-GenericName=Music Player
-Icon=spotify-client
-TryExec=spotify
-Exec=env LD_PRELOAD=/usr/local/lib/spotify-adblock.so spotify %U
-Terminal=false
-MimeType=x-scheme-handler/spotify;
-Categories=Audio;Music;Player;AudioVideo;
-StartupWMClass=spotify
-```
-  </p>
-</details>
-
-## Uninstalling
-    $ sudo make uninstall
+    $ DYLD_INSERT_LIBRARIES=spotify-adblock.dylib /Applications/Spotify.app/Contents/MacOS/Spotify
