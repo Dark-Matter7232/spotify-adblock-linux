@@ -6,7 +6,6 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "include/capi/cef_urlrequest_capi.h"
 

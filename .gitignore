@@ -1,1 +1,5 @@
-spotadblock-mac.dylib
+*.dylib
+*.so
+include
+*.bz2
+*combine
