@@ -6,6 +6,9 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "include/capi/cef_urlrequest_capi.h"
 
 #include "blacklist.h"
 #include "whitelist.h"
@@ -31,6 +34,8 @@
 
 static typeof(getaddrinfo) *real_getaddrinfo = NULL;
 static typeof(curl_easy_setopt) *real_setopt = NULL;
+static typeof(cef_urlrequest_create) *real_cef_urlrequest_create = NULL;
+
 static bool verbose = false;
 
 static void init_real_getaddrinfo(void) {
@@ -55,13 +60,13 @@ int getaddrinfo2(const char *node, const char *service,
         return EAI_FAIL;
     }
     for (int i = 0; i < sizeof(whitelist) / sizeof(whitelist[0]); i++) {
-        if (!fnmatch(whitelist[i], node, FNM_NOESCAPE)) {
-            if (verbose) LOG_GREEN("[+] %s", node);
+        if (!fnmatch(whitelist[i], node, 0)) {
+            if (verbose) LOG_GREEN("[+] getaddrinfo:\t\t%s", node);
             if (!real_getaddrinfo) init_real_getaddrinfo();
             return real_getaddrinfo(node, service, hints, res);
         }
     }
-    if (verbose) LOG_RED("[-] %s", node);
+    if (verbose) LOG_RED("[-] getaddrinfo:\t\t%s", node);
     return EAI_FAIL;
 }
 
@@ -72,15 +77,15 @@ CURLcode curl_easy_setopt2(CURL *handle, CURLoption option, ...) {
         char *url = va_arg(args, char *);
         va_end(args);
         for (int i = 0; i < sizeof(blacklist) / sizeof(blacklist[0]); i++) {
-            if (!fnmatch(blacklist[i], url, FNM_NOESCAPE)) {
-                if (verbose) LOG_RED("[-] %s\n", url);
+            if (!fnmatch(blacklist[i], url, 0)) {
+                if (verbose) LOG_RED("[-] curl_easy_setopt:\t\t%s\n", url);
                 // destroy handle, so the request can never be attempted
                 curl_easy_cleanup(handle);
                 handle = NULL;
                 return CURLE_OK;
             }
         }
-        if (verbose) LOG_GREEN("[+] %s\n", url);
+        if (verbose) LOG_GREEN("[+] curl_easy_setopt:\t\t%s\n", url);
     }
     if (!real_setopt) init_real_setopt();
     void *args = __builtin_apply_args();
@@ -96,7 +101,21 @@ __attribute__((constructor)) static void injectedConstructor(
         verbose = true;
     }
 }
-
+cef_urlrequest_t* cef_urlrequest_create(struct _cef_request_t* request, struct _cef_urlrequest_client_t* client, struct _cef_request_context_t* request_context) {
+    cef_string_userfree_utf16_t url_utf16 = request->get_url(request);
+    char url[url_utf16->length + 1];
+    url[url_utf16->length] = '\0';
+    for (int i = 0; i < url_utf16->length; i++) url[i] = *(url_utf16->str + i);
+    cef_string_userfree_utf16_free(url_utf16);
+    for (int i = 0; i < sizeof(blacklist) / sizeof(blacklist[0]); i++) {
+        if (!fnmatch(blacklist[i], url, 0)) {
+            printf("[-] cef_urlrequest_create:\t%s", url);
+            return NULL;
+        }
+    }
+    printf("[+] cef_urlrequest_create:\t%s", url);
+    return real_cef_urlrequest_create(request, client, request_context);
+}
 // Interpose our overrides
 DYLD_INTERPOSE(getaddrinfo2, getaddrinfo)
 DYLD_INTERPOSE(curl_easy_setopt2, curl_easy_setopt)
