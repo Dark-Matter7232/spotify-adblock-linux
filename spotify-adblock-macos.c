@@ -44,14 +44,12 @@ bool listed(const char *item, const char *list[], ssize_t list_size) {
     }
     return false;
 }
-
 static void init_real_getaddrinfo(void) {
     real_getaddrinfo = dlsym(RTLD_NEXT, "getaddrinfo");
     if (!real_getaddrinfo) {
         LOG_RED("dlsym (getaddrinfo): %s", dlerror());
     }
 }
-
 int getaddrinfo2(const char *node, const char *service,
                  const struct addrinfo *hints, struct addrinfo **res) {
     // This might break some things?
@@ -70,17 +68,17 @@ int getaddrinfo2(const char *node, const char *service,
     return EAI_FAIL;
 }
 
-cef_urlrequest_t* cef_urlrequest_create2(struct _cef_request_t* request, struct _cef_urlrequest_client_t* client, struct _cef_request_context_t* request_context) {
+cef_urlrequest_t* cef_urlrequest_create(struct _cef_request_t* request, struct _cef_urlrequest_client_t* client, struct _cef_request_context_t* request_context) {
     cef_string_userfree_utf16_t url_utf16 = request->get_url(request);
     char url[url_utf16->length + 1];
     url[url_utf16->length] = '\0';
     for (int i = 0; i < url_utf16->length; i++) url[i] = *(url_utf16->str + i);
     cef_string_userfree_utf16_free(url_utf16);
     if (listed(url, blacklist, blacklist_size)) {
-        LOG_GREEN("[-] cef_urlrequest_create2:\t%s", url);
+        LOG_GREEN("[-] cef_urlrequest_create:\t%s", url);
         return NULL;
     }
-    LOG_GREEN("[+] cef_urlrequest_create2:\t%s", url);
+    LOG_GREEN("[+] cef_urlrequest_create:\t%s", url);
     return real_cef_urlrequest_create(request, client, request_context);
 }
 __attribute__((constructor)) static void injectedConstructor(
@@ -94,4 +92,4 @@ __attribute__((constructor)) static void injectedConstructor(
 
 // Interpose our overrides
 DYLD_INTERPOSE(getaddrinfo2, getaddrinfo)
-DYLD_INTERPOSE(cef_urlrequest_create2, cef_urlrequest_create)
+//DYLD_INTERPOSE(cef_urlrequest_create2, cef_urlrequest_create)
