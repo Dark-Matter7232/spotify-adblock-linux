@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS=-march=native -mtune=native -flto -O3 -Wall -s -dynamiclib -fPIC -I.
+CC=gcc-9
+CFLAGS=-Wall -dynamiclib -fPIC -I.
 LDLIBS=-ldl -lcurl
 TARGET=spotify-adblock-macos
 

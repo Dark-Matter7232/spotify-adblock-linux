@@ -10,10 +10,11 @@ Prerequisites:
 
 ### Build Process 
 ```
+$ brew install gcc make gnutar  
 $ git clone https://github.com/Dark-Matter7232/spotify-adblock-mac.git
-$ cd spotify-adblock-linux
+$ cd spotify-adblock-mac
 $ wget -O cef.tar.bz2 https://cef-builds.spotifycdn.com/cef_binary_91.1.21%2Bg9dd45fe%2Bchromium-91.0.4472.114_macosx64_minimal.tar.bz2
-$ tar -xf cef.tar.bz2 --wildcards '*/include' --strip-components=1
+$ gtar -xf cef.tar.bz2 --wildcards '*/include' --strip-components=1
 $ make
 ```
 # Notes
